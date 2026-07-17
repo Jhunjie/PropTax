@@ -19,6 +19,11 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            $table->boolean('is_verified')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->string('tin')->unique();
+            $table->enum('role', ['user', 'admin'])->default('user');
+            $table->date('date_created')->useCurrent();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

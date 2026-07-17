@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int $id
@@ -25,7 +26,7 @@ use Illuminate\Support\Str;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'is_verified', 'status', 'tin', 'role', 'date_created'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -41,8 +42,33 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'date_created' => 'date',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function (User $user) {
+            if (empty($user->id)) {
+                $user->id = static::generateAcctNo();
+            }
+        });
+    }
+
+    public static function generateAcctNo(): string
+    {
+        return DB::transaction(function () {
+            $last = static::lockForUpdate()
+                ->orderByDesc('id')
+                ->value('id');
+
+            $next = $last ? ((int) $last) + 1 : 1;
+
+            return str_pad((string) $next, 9, '0', STR_PAD_LEFT);
+        });
     }
 
     /**

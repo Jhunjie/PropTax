@@ -29,6 +29,17 @@
                 autocomplete="email"
                 placeholder="email@example.com"
             />
+            
+            <!-- TIN -->
+            <flux:input
+                name="tin"
+                :label="__('TIN No.')"
+                :value="old('tin')"
+                type="text"
+                required
+                autofocus
+                :placeholder="__('TIN')"
+            />
 
             <!-- Password -->
             <flux:input
