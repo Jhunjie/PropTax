@@ -409,7 +409,7 @@
         <div class="bill-due-lbl">Amount due</div>
         <div class="bill-due-amt">₱4,812.60</div>
         <a href="#" class="bill-pay-btn">Pay now</a>
-        <div class="bill-fine-print">Bank transfer is free · No account required</div>
+        <div class="bill-fine-print">Bank transfer fees may apply</div>
       </div>
     </div>
   </div>
