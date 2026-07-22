@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('status');
             $table->timestamps();
             $table->index(['acct_email_address']);
-            $table->foreign(['acct_email_address'])->references(['email'])->on('users');
+            $table->index(['acct_no']);
         });
     }
     public function down(): void
