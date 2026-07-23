@@ -26,7 +26,8 @@ class UserProperties extends Component
     {
         $this->validate();
         
-        Excel::import(new PropertyRegistrationSheetImport, $this->upload);
+        $import = new PropertyRegistrationSheetImport;
+        Excel::import($import, $this->upload);
 
         $path = $this->upload->store('uploads/property-registrations');
 
@@ -35,6 +36,16 @@ class UserProperties extends Component
         $this->dispatch('$refresh');
 
         session()->flash('status', "Upload processed and saved to {$path}.");
+    
+        if (!empty($import->duplicates)) {
+            $count = count($import->duplicates);
+            $examples = collect($import->duplicates)->take(5)->map(fn ($d) => "{$d['account_code']} ({$d['type']})")->implode(', ');
+
+            session()->flash(
+                'duplicate_warning',
+                "{$count} duplicate row(s) skipped: {$examples}" . ($count > 5 ? '...' : '')
+            );
+        }
     }
 
     public function render()

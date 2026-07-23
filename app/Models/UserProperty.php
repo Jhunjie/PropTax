@@ -28,8 +28,8 @@ class UserProperty extends Model
         'acct_no' => 'integer',
     ];
     
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'acct_email_address', 'email');
-    }
+    // public function user()
+    // {
+    //     return $this->belongsTo(User::class, 'acct_email_address', 'email');
+    // }
 }

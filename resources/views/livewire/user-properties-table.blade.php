@@ -16,14 +16,18 @@
         <flux:callout variant="success" class="mb-4">{{ session('status') }}</flux:callout>
     @endif
 
+    @if (session('duplicate_warning'))
+        <flux:callout variant="warning" class="mb-4">{{ session('duplicate_warning') }}</flux:callout>
+    @endif
+
     @error('upload')
         <flux:callout variant="danger" class="mb-4">{{ $message }}</flux:callout>
     @enderror
 
     <flux:table>
         <flux:table.columns>
-            <flux:table.column>{{ __('Email Address') }}</flux:table.column>
             <flux:table.column>{{ __('Account No') }}</flux:table.column>
+            <flux:table.column>{{ __('Email Address') }}</flux:table.column>
             <flux:table.column>{{ __('Account Name') }}</flux:table.column>
             <flux:table.column>{{ __('Account Code') }}</flux:table.column>
             <flux:table.column>{{ __('Type') }}</flux:table.column>
@@ -38,8 +42,15 @@
         <flux:table.rows>
             @forelse ($userPropertiesData as $property)
                 <flux:table.row wire:key="property-{{ $property->id }}">
+                    <flux:table.cell>
+                        <flux:link :href="route('accounts.user-email-update', ['acctNo' => $property->acct_no])"
+                            wire:navigate
+                            class="text-green-600 hover:text-green-800 hover:underline dark:text-green-400 dark:hover:text-green-300"
+                        >
+                            {{ $property->acct_no }}
+                        </flux:link>
+                </flux:table.cell>
                     <flux:table.cell>{{ $property->acct_email_address }}</flux:table.cell>
-                    <flux:table.cell>{{ $property->acct_no }}</flux:table.cell>
                     <flux:table.cell>{{ $property->name_of_account }}</flux:table.cell>
                     <flux:table.cell>{{ $property->account_code }}</flux:table.cell>
                     <flux:table.cell>{{ $property->type }}</flux:table.cell>

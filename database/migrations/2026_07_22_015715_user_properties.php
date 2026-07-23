@@ -8,7 +8,7 @@ return new class extends Migration
     {
         Schema::create('user_properties', function (Blueprint $table) {
             $table->id();
-            $table->string('acct_email_address');
+            $table->string('acct_email_address')->nullable();
             $table->unsignedBigInteger('acct_no');
             $table->string('name_of_account');
             $table->string('account_code');
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('date_of_registration');
             $table->string('status');
             $table->timestamps();
-            $table->index(['acct_email_address']);
+            // $table->index(['acct_email_address']);
             $table->index(['acct_no']);
         });
     }
