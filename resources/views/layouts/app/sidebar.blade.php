@@ -15,9 +15,14 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="building-office" :href="route('user-properties-table')" :current="request()->routeIs('user-properties-table')" wire:navigate>
-                        {{ __('Properties') }}
-                    </flux:sidebar.item>
+                    @if (auth()->user()->role === 'admin')
+                        <flux:sidebar.item icon="user-group" :href="route('accounts.approvals')" :current="request()->routeIs('accounts.approvals')" wire:navigate>
+                            {{ __('Account approvals') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="building-office" :href="route('user-properties-table')" :current="request()->routeIs('user-properties-table')" wire:navigate>
+                            {{ __('Properties') }}
+                        </flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

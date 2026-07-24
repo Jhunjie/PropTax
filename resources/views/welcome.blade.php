@@ -28,6 +28,58 @@
     --radius:14px;
     --shadow: 0 24px 60px -30px rgba(20,23,31,0.28);
   }
+
+.status-banner{
+  background:var(--green-soft); color:var(--green-deep);
+  border-bottom:1px solid var(--green);
+  padding:14px 0;
+}
+.status-banner.is-error{
+  background:#FBEAE5; color:#8A3A24; border-bottom-color:#B3402A;
+}
+.status-banner .wrap{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+}
+.status-banner p{
+  margin:0; font-size:14px; font-weight:500; line-height:1.5;
+}
+.status-banner .dismiss{
+  background:none; border:none; cursor:pointer; color:inherit; opacity:0.6;
+  font-size:15px; line-height:1; padding:4px; flex-shrink:0;
+  transition:opacity .15s ease;
+}
+.status-banner .dismiss:hover{ opacity:1; }
+
+/* ---------- TOAST NOTIFICATIONS ---------- */
+.toast-stack{
+  position:fixed; top:20px; right:20px; z-index:1000;
+  display:flex; flex-direction:column; gap:10px;
+  max-width:380px; width:calc(100% - 40px);
+}
+.toast{
+  display:flex; align-items:flex-start; gap:10px;
+  background:var(--surface); color:var(--ink);
+  border:1px solid var(--line-strong); border-left:4px solid var(--green);
+  border-radius:10px; padding:14px 14px;
+  box-shadow:var(--shadow);
+  font-size:13.5px; line-height:1.5;
+  transform:translateX(24px); opacity:0;
+  transition:transform .25s ease, opacity .25s ease;
+}
+.toast.is-visible{ transform:translateX(0); opacity:1; }
+.toast.toast-error{ border-left-color:#B3402A; }
+.toast.toast-success{ border-left-color:var(--green); }
+.toast-icon{ flex-shrink:0; width:18px; height:18px; margin-top:1px; }
+.toast-error .toast-icon{ color:#B3402A; }
+.toast-success .toast-icon{ color:var(--green); }
+.toast-body{ flex:1; min-width:0; }
+.toast-close{
+  background:none; border:none; cursor:pointer; color:var(--ink-faint);
+  opacity:0.7; font-size:14px; line-height:1; padding:2px; flex-shrink:0;
+}
+.toast-close:hover{ opacity:1; }
+@media (prefers-reduced-motion: reduce){ .toast{ transition:none; } }
+
   *{ box-sizing:border-box; }
   html{ scroll-behavior:smooth; }
   body{
@@ -357,7 +409,7 @@
         <rect x="4.5" y="14" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
         <rect x="14" y="14" width="7.5" height="7.5" rx="1.5" fill="#C99A2E"/>
       </svg>
-      Ngalan ka System
+      {{ config('app.name') }}
     </div>
     <div class="nav-links">
       <a href="#how">How it works</a>
@@ -605,7 +657,7 @@
         <rect x="4.5" y="14" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
         <rect x="14" y="14" width="7.5" height="7.5" rx="1.5" fill="#C99A2E"/>
       </svg>
-      Ngalan ka System
+      {{ config('app.name') }}
     </div>
     <div class="foot-links">
       <a href="#">Privacy</a>
@@ -620,6 +672,8 @@
   </div>
 </footer>
 
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
 @guest
 <div class="modal-overlay" id="loginModal" aria-hidden="true">
   <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
@@ -632,7 +686,7 @@
         <rect x="4.5" y="14" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
         <rect x="14" y="14" width="7.5" height="7.5" rx="1.5" fill="#C99A2E"/>
       </svg>
-      Ngalan ka System
+      {{ config('app.name') }}
     </div>
     <h2 id="loginModalTitle">Welcome back</h2>
     <p class="modal-sub">Log in to view your properties and pay your bill.</p>
@@ -678,22 +732,15 @@
         <rect x="4.5" y="14" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
         <rect x="14" y="14" width="7.5" height="7.5" rx="1.5" fill="#C99A2E"/>
       </svg>
-      Ngalan ka System
+      {{ config('app.name') }}
     </div>
     <h2 id="registerModalTitle">Create your account</h2>
     <p class="modal-sub">One account holds every property you own.</p>
     <form method="POST" action="{{ route('register') }}">
       @csrf
       <div class="field-group">
-        <label for="register-name">Full name</label>
-        <input id="register-name" type="text" name="name" value="{{ old('name') }}" required autofocus>
-        @error('name', 'register')
-          <div class="field-error">{{ $message }}</div>
-        @enderror
-      </div>
-      <div class="field-group">
         <label for="register-email">Email</label>
-        <input id="register-email" type="email" name="email" value="{{ old('email') }}" required>
+        <input id="register-email" type="email" name="email" value="{{ old('email') }}" required autofocus>
         @error('email', 'register')
           <div class="field-error">{{ $message }}</div>
         @enderror
@@ -733,6 +780,35 @@
 @endguest
 
 <script>
+  // toast notifications
+  function showToast(message, type){
+    const stack = document.getElementById('toastStack');
+    if(!stack || !message) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-' + (type === 'error' ? 'error' : 'success');
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+
+    const icon = type === 'error'
+      ? '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>'
+      : '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.2l2.3 2.3 4.7-5"/></svg>';
+
+    toast.innerHTML = icon
+      + '<div class="toast-body"></div>'
+      + '<button type="button" class="toast-close" aria-label="Dismiss">&times;</button>';
+    toast.querySelector('.toast-body').textContent = message;
+
+    const remove = () => {
+      toast.classList.remove('is-visible');
+      setTimeout(()=> toast.remove(), 250);
+    };
+    toast.querySelector('.toast-close').addEventListener('click', remove);
+
+    stack.appendChild(toast);
+    requestAnimationFrame(()=> toast.classList.add('is-visible'));
+    setTimeout(remove, 7000);
+  }
+
   // auth modals
   (function(){
     const modals = { login: document.getElementById('loginModal'), register: document.getElementById('registerModal') };
@@ -760,6 +836,15 @@
       Object.values(modals).forEach(m=> m && closeModal(m));
     }
 
+    // Expose these so the server-driven "reopen this modal" snippet below
+    // (and anything else on the page) can call them; without this they were
+    // trapped inside this closure and silently failed to run, which is why
+    // the modal appeared to just close/exit instead of reopening with the
+    // validation error still showing.
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.closeAllAuthModals = closeAll;
+
     document.querySelectorAll('[data-open-modal]').forEach(btn=>{
       btn.addEventListener('click', ()=> openModal(btn.dataset.openModal));
     });
@@ -780,21 +865,48 @@
       if(e.key === 'Escape') closeAll();
     });
   })();
+
+  // auto-dash the TIN field as the user types: 000-000-000-00000
+  (function(){
+    const tin = document.getElementById('register-tin');
+    if(!tin) return;
+    tin.addEventListener('input', ()=>{
+      const digits = tin.value.replace(/\D/g, '').slice(0, 14);
+      const groups = [digits.slice(0,3), digits.slice(3,6), digits.slice(6,9), digits.slice(9,14)]
+        .filter(g => g.length > 0);
+      tin.value = groups.join('-');
+    });
+  })();
 </script>
 
-<!-- reopen the relevant modal automatically if the server redirected back with validation errors -->
+<!-- reopen the relevant modal automatically if the server redirected back with validation errors,
+     and surface a toast for anything the person needs to notice right away -->
 @php
   $loginHasErrors = isset($errors) && $errors->hasBag('login') && $errors->login->any();
   $registerHasErrors = isset($errors) && $errors->hasBag('register') && $errors->register->any();
 @endphp
 @if ($loginHasErrors)
-  <script>openModal('login');</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      openModal('login');
+      showToast(@json($errors->login->first()), 'error');
+    });
+  </script>
 @elseif ($registerHasErrors)
-  <script>openModal('register');</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      openModal('register');
+    });
+  </script>
 @endif
 
-<script>
-</script>
+@if (session('status'))
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      showToast(@json(session('status')), 'success');
+    });
+  </script>
+@endif
 
 <script>
   // signature visual: self-drawing cadastral parcel grid

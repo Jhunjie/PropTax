@@ -18,7 +18,12 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // The app defines its own login/register/logout routes (with its own
+        // controllers and business logic) in routes/web.php. Without this,
+        // Fortify additionally registers its own routes under the same names
+        // ('login', 'register', 'logout', 'register.store', ...), which
+        // silently collide with the app's routes.
+        Fortify::ignoreRoutes();
     }
 
     /**

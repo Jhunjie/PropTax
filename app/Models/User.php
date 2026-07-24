@@ -29,6 +29,14 @@ use Illuminate\Support\Str;
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
+
+    const STATUS_PENDING  = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
+
+    const ROLE_USER  = 'user';
+    const ROLE_ADMIN = 'admin';
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
@@ -62,4 +70,9 @@ class User extends Authenticatable
             ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
             : $initials;
     }
+
+    public function isApproved(): bool { return $this->status === self::STATUS_APPROVED; }
+    public function isPending(): bool { return $this->status === self::STATUS_PENDING; }
+    public function isRejected(): bool { return $this->status === self::STATUS_REJECTED; }
+    public function isAdmin(): bool { return $this->role === self::ROLE_ADMIN; }
 }
