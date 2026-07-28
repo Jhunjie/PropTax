@@ -55,6 +55,10 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('admin.dashboard', absolute: false));
         }
 
+        if (! $user->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
         if (! $user->isApproved()) {
             $message = $user->isPending()
                 ? __('Your account is still pending approval. Please wait for admin review.')

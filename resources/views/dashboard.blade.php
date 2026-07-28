@@ -15,7 +15,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
             </div>
             <h1 style="font-size:22px;">{{ __('Your account is awaiting verification') }}</h1>
-            <p>{{ __('Thanks for registering, :name. Please visit the admin office in person to verify your details — once approved, your linked properties will show up here.', ['name' => $user->name]) }}</p>
+            <p>{{ __('Thanks for registering. Please visit the admin office in person to verify your details — once approved, your linked properties will show up here.') }}</p>
             <p>{{ __("We'll email you as soon as your account is approved or rejected.") }}</p>
         </div>
 
@@ -32,7 +32,13 @@
     @else
 
         <div>
-            <h1 style="font-size:26px;">{{ __('Welcome back, :name', ['name' => explode(' ', $user->name)[0]]) }}</h1>
+            <h1 style="font-size:26px;">
+                @if ($user->name)
+                    {{ __('Welcome back, :name', ['name' => explode(' ', $user->name)[0]]) }}
+                @else
+                    {{ __('Welcome back') }}
+                @endif
+            </h1>
             <p style="color:var(--ink-soft); font-size:14.5px; margin-top:6px; margin-bottom:28px;">
                 {{ __('Your account and the properties linked to it.') }}
             </p>
@@ -49,7 +55,7 @@
                 <div class="info-grid">
                     <div>
                         <div class="lbl">{{ __('Name') }}</div>
-                        <div class="value">{{ $user->name }}</div>
+                        <div class="value">{{ $user->name ?? __('Not yet on file') }}</div>
                     </div>
                     <div>
                         <div class="lbl">{{ __('Email') }}</div>
@@ -91,6 +97,7 @@
                     </div>
                 @else
                     <div class="panel">
+                        <div class="table-scroll">
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -130,6 +137,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 @endif
             </div>

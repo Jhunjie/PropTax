@@ -91,6 +91,7 @@
                 @endif
             </div>
         @else
+            <div class="table-scroll">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -107,8 +108,8 @@
                         <tr wire:key="account-{{ $account->id }}">
                             <td>
                                 <div class="row-flex">
-                                    <div class="avatar-sm">{{ strtoupper(substr($account->name, 0, 1)) }}</div>
-                                    <span style="font-weight:500;">{{ $account->name }}</span>
+                                    <div class="avatar-sm">{{ $account->name ? strtoupper(substr($account->name, 0, 1)) : '?' }}</div>
+                                    <span style="font-weight:500;">{{ $account->name ?? __('Not yet linked') }}</span>
                                 </div>
                             </td>
                             <td>{{ $account->email }}</td>
@@ -125,7 +126,7 @@
                                         <button
                                             type="button"
                                             wire:click="approve({{ $account->id }})"
-                                            wire:confirm="{{ __('Approve :name\'s account?', ['name' => $account->name]) }}"
+                                            wire:confirm="{{ __('Approve this account? (:email)', ['email' => $account->email]) }}"
                                             class="btn btn-sm btn-green"
                                         >
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
@@ -137,7 +138,7 @@
                                         <button
                                             type="button"
                                             wire:click="reject({{ $account->id }})"
-                                            wire:confirm="{{ __('Reject :name\'s account?', ['name' => $account->name]) }}"
+                                            wire:confirm="{{ __('Reject this account? (:email)', ['email' => $account->email]) }}"
                                             class="btn btn-sm btn-rust"
                                         >
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -150,6 +151,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         @endif
     </div>
 

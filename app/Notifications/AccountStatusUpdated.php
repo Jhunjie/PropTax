@@ -27,10 +27,12 @@ class AccountStatusUpdated extends Notification implements ShouldQueue
 
     public function toMail(User $notifiable): MailMessage
     {
+        $greeting = 'Hi'.($notifiable->name ? " {$notifiable->name}" : '').',';
+
         if ($this->status === 'approved') {
             return (new MailMessage)
                 ->subject('Your account has been approved')
-                ->greeting("Hi {$notifiable->name},")
+                ->greeting($greeting)
                 ->line('Good news — your account has been verified and approved by an administrator.')
                 ->line('You can now log in and view the properties linked to your account.')
                 ->action('Log in', route('login'));
@@ -38,7 +40,7 @@ class AccountStatusUpdated extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('Your account verification was not approved')
-            ->greeting("Hi {$notifiable->name},")
+            ->greeting($greeting)
             ->line('An administrator reviewed your account and was unable to approve your verification.')
             ->line('Please visit the admin office in person for details and next steps.');
     }

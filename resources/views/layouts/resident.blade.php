@@ -25,14 +25,7 @@
 <div class="shell">
   <aside class="sidebar" id="residentSidebar">
     <div class="sidebar-brand">
-      <svg class="mark" viewBox="0 0 26 26" fill="none">
-        <rect x="1" y="1" width="24" height="24" rx="6" fill="#0E6B52"/>
-        <rect x="4.5" y="4.5" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.9"/>
-        <rect x="14" y="4.5" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
-        <rect x="4.5" y="14" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
-        <rect x="14" y="14" width="7.5" height="7.5" rx="1.5" fill="#C99A2E"/>
-      </svg>
-      {{ config('app.name') }}
+      <x-brand-mark size="sm" />
     </div>
 
     <nav class="sidebar-nav">
@@ -64,6 +57,8 @@
     </div>
   </aside>
 
+  <div class="sidebar-backdrop" id="residentSidebarBackdrop"></div>
+
   <div class="main">
     <div class="topbar">
       <div class="topbar-brand">{{ $title ?? config('app.name') }}</div>
@@ -82,14 +77,20 @@
   (function(){
     var toggle = document.getElementById('sidebarToggle');
     var sidebar = document.getElementById('residentSidebar');
+    var backdrop = document.getElementById('residentSidebarBackdrop');
     if(!toggle || !sidebar) return;
+    function setOpen(open){
+      sidebar.classList.toggle('is-open', open);
+      if(backdrop) backdrop.classList.toggle('is-open', open);
+    }
     toggle.addEventListener('click', function(){
-      sidebar.classList.toggle('is-open');
+      setOpen(!sidebar.classList.contains('is-open'));
     });
+    if(backdrop) backdrop.addEventListener('click', function(){ setOpen(false); });
     document.addEventListener('click', function(e){
       if(window.innerWidth > 900) return;
       if(!sidebar.contains(e.target) && !toggle.contains(e.target)){
-        sidebar.classList.remove('is-open');
+        setOpen(false);
       }
     });
   })();

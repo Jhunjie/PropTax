@@ -56,7 +56,8 @@ class AccountApprovals extends Component
 
         $user->notify(new AccountStatusUpdated($status));
 
-        session()->flash('status', "{$user->name}'s account was marked as {$status}.");
+        $label = $user->name ?: $user->email;
+        session()->flash('status', "{$label}'s account was marked as {$status}.");
     }
 
     #[Computed]

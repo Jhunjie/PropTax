@@ -59,6 +59,7 @@
             </div>
         @else
             <div class="panel">
+                <div class="table-scroll">
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -83,6 +84,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             </div>
         @endif
     </div>

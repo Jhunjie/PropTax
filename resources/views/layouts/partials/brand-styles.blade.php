@@ -17,6 +17,16 @@
   a{ color:inherit; }
   :focus-visible{ outline:2px solid var(--green); outline-offset:3px; border-radius:4px; }
 
+  /* ---------- brand mark (logo + two-line name) ---------- */
+  .brand-mark{ display:flex; align-items:center; gap:10px; }
+  .brand-mark-logo{ height:34px; width:auto; flex-shrink:0; object-fit:contain; }
+  .brand-mark-text{ display:flex; flex-direction:column; line-height:1.2; }
+  .brand-mark-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; letter-spacing:.01em; }
+  .brand-mark-sub{ font-size:10px; color:var(--ink-faint); font-weight:500; }
+  .brand-mark-sm .brand-mark-logo{ height:26px; }
+  .brand-mark-sm .brand-mark-title{ font-size:11px; }
+  .brand-mark-sm .brand-mark-sub{ font-size:9px; }
+
   /* ---------- shell ---------- */
   .shell{ display:flex; min-height:100vh; }
 
@@ -75,7 +85,14 @@
     .main{ margin-left:0; }
     .topbar{ display:flex; }
     .content{ padding:28px 20px 48px; }
+    .sidebar-backdrop{
+      display:block; position:fixed; inset:0; z-index:45;
+      background:rgba(20,23,31,0.4); opacity:0; visibility:hidden;
+      transition:opacity .2s ease, visibility 0s linear .2s;
+    }
+    .sidebar-backdrop.is-open{ opacity:1; visibility:visible; transition:opacity .2s ease, visibility 0s linear 0s; }
   }
+  .sidebar-backdrop{ display:none; }
 
   /* ---------- shared page components ---------- */
   .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
@@ -105,7 +122,8 @@
 
   .panel{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
   .panel-head{ display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--line); }
-  table.data-table{ width:100%; border-collapse:collapse; }
+  .table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  table.data-table{ width:100%; min-width:640px; border-collapse:collapse; }
   table.data-table th{ text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); font-weight:500; padding:12px 20px; background:var(--surface-2); }
   table.data-table td{ padding:14px 20px; font-size:13.5px; border-top:1px solid var(--line); }
   table.data-table tr:hover td{ background:var(--surface-2); }
@@ -121,6 +139,11 @@
   /* ---------- page header row ---------- */
   .page-head{ display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; justify-content:space-between; margin-bottom:28px; }
   .page-head p{ color:var(--ink-soft); font-size:14.5px; margin-top:6px; }
+  @media (max-width:640px){
+    .page-head{ align-items:stretch; }
+    .page-head > div:last-child{ width:100%; }
+    .page-head .btn{ flex:1; }
+  }
 
   /* ---------- buttons ---------- */
   .btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 18px; border-radius:100px; font-size:13.5px; font-weight:500; border:1px solid transparent; cursor:pointer; text-decoration:none; font-family:inherit; line-height:1; transition:background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease; }
@@ -149,6 +172,11 @@
   .search-field .clear-x svg{ position:static; width:13px; height:13px; }
   .select-field{ padding:10px 32px 10px 14px; border:1px solid var(--line-strong); border-radius:10px; font-size:13.5px; font-family:inherit; background-color:var(--surface); color:var(--ink); appearance:none; cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235B6169' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; background-size:15px; }
   .select-field:focus{ outline:none; border-color:var(--green); }
+  @media (max-width:640px){
+    .filter-bar{ flex-direction:column; align-items:stretch; }
+    .search-field{ flex-basis:auto; }
+    .select-field{ width:100%; }
+  }
 
   /* ---------- callouts ---------- */
   .callout{ display:flex; gap:10px; align-items:flex-start; padding:13px 16px; border-radius:12px; font-size:13.5px; line-height:1.55; margin-bottom:18px; }
@@ -186,14 +214,22 @@
   .field-error{ color:var(--rust); font-size:12.5px; margin-top:7px; }
   .field-hint{ color:var(--ink-soft); font-size:13px; margin-top:10px; line-height:1.55; }
   .loading-note{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-soft); }
+  .field-row-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:420px){ .field-row-2{ grid-template-columns:1fr; } }
 
   /* ---------- modal ---------- */
   .modal-mask{ position:fixed; inset:0; background:rgba(20,23,31,0.45); backdrop-filter:blur(2px); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px; }
-  .modal-box{ background:var(--surface); border-radius:16px; padding:26px; width:100%; max-width:440px; box-shadow:var(--shadow); }
-  .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+  .modal-box{ background:var(--surface); border-radius:16px; padding:26px; width:100%; max-width:440px; max-height:calc(100dvh - 40px); overflow-y:auto; box-shadow:var(--shadow); }
+  .modal-box.modal-box-lg{ max-width:560px; }
+  .modal-actions{
+    display:flex; justify-content:flex-end; gap:10px;
+    position:sticky; bottom:-26px;
+    margin:20px -26px -26px; padding:14px 26px 20px;
+    background:var(--surface); border-top:1px solid var(--line);
+  }
 
   /* ---------- pagination ---------- */
-  .pager{ display:flex; align-items:center; justify-content:center; gap:4px; margin-top:26px; font-family:'IBM Plex Mono'; font-size:12.5px; }
+  .pager{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px; margin-top:26px; font-family:'IBM Plex Mono'; font-size:12.5px; }
   .pager button, .pager span{ min-width:32px; height:32px; padding:0 6px; display:flex; align-items:center; justify-content:center; border-radius:9px; color:var(--ink-soft); border:none; background:none; cursor:pointer; font-family:inherit; }
   .pager button:hover{ background:var(--surface-2); color:var(--ink); }
   .pager button:disabled{ opacity:.4; cursor:not-allowed; }

@@ -61,11 +61,22 @@
             @enderror
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:20px;">
+        <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
             <button type="button" wire:click="update" wire:loading.attr="disabled" wire:target="update" class="btn btn-dark">
                 <span wire:loading.remove wire:target="update">{{ __('Update') }}</span>
                 <span wire:loading wire:target="update">{{ __('Updating...') }}</span>
             </button>
+
+            @if ($email !== '')
+                <button
+                    type="button"
+                    wire:click="unlink"
+                    wire:confirm="{{ __('Unlink account #:acctNo from its current email?', ['acctNo' => $acctNo]) }}"
+                    class="btn btn-ghost"
+                >
+                    {{ __('Unlink') }}
+                </button>
+            @endif
 
             <a href="{{ route('user-properties-table') }}" wire:navigate class="btn btn-ghost">
                 {{ __('Back') }}

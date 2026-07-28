@@ -28,35 +28,47 @@ class UserProperties extends Component
     #[Url(history: true)]
     public string $status = 'all';
 
-    // Manual "Add Property" form fields.
-    public string $newAcctNo = '';
+    // Manual "Add Property" form fields
+    public ?int $newAcctNo = null;
+
     public string $newNameOfAccount = '';
+
     public string $newAccountCode = '';
+
     public string $newType = 'Land';
+
     public string $newLotNo = '';
+
     public string $newBrgyName = '';
+
     public string $newLgu = '';
+
     public string $newDateOfRegistration = '';
+
     public string $newStatus = 'active';
-    public string $newEmail = '';
 
-    protected $rules = [
-        'upload' => 'required|file|mimes:xlsx,xls|max:10240',
-    ];
+    public string $newAcctEmailAddress = '';
 
-    protected function addPropertyRules(): array
+    protected function importRules(): array
     {
         return [
-            'newAcctNo' => ['required', 'integer'],
-            'newNameOfAccount' => ['required', 'string', 'max:255'],
-            'newAccountCode' => ['required', 'string', 'max:255'],
-            'newType' => ['required', 'in:Land,Impr/Bldg'],
-            'newLotNo' => ['nullable', 'string', 'max:255'],
-            'newBrgyName' => ['required', 'string', 'max:255'],
-            'newLgu' => ['required', 'string', 'max:255'],
-            'newDateOfRegistration' => ['required', 'date'],
-            'newStatus' => ['required', 'string', 'max:255'],
-            'newEmail' => ['nullable', 'email', 'max:255'],
+            'upload' => 'required|file|mimes:xlsx,xls|max:10240',
+        ];
+    }
+
+    protected function newPropertyRules(): array
+    {
+        return [
+            'newAcctNo' => 'required|integer|min:1',
+            'newNameOfAccount' => 'required|string|max:255',
+            'newAccountCode' => 'required|string|max:255',
+            'newType' => 'required|in:Land,Impr/Bldg',
+            'newLotNo' => 'nullable|string|max:255',
+            'newBrgyName' => 'required|string|max:255',
+            'newLgu' => 'required|string|max:255',
+            'newDateOfRegistration' => 'required|date',
+            'newStatus' => 'required|string|max:255',
+            'newAcctEmailAddress' => 'nullable|email|max:255',
         ];
     }
 
@@ -83,7 +95,7 @@ class UserProperties extends Component
 
     public function importUpload()
     {
-        $this->validate();
+        $this->validate($this->importRules());
 
         $import = new PropertyRegistrationSheetImport;
         $import->import($this->upload->getRealPath());
@@ -120,70 +132,46 @@ class UserProperties extends Component
 
     public function addProperty()
     {
-        $validated = $this->validate($this->addPropertyRules());
+        $validated = $this->validate($this->newPropertyRules());
 
-        $duplicate = UserProperty::where('account_code', $validated['newAccountCode'])
+        $exists = UserProperty::where('acct_no', $validated['newAcctNo'])
             ->where('type', $validated['newType'])
             ->exists();
 
-        if ($duplicate) {
-            $this->addError('newAccountCode', __('A property with this account code and type already exists.'));
+        if ($exists) {
+            $this->addError('newAcctNo', __('A :type property with account #:acctNo already exists.', [
+                'type' => $validated['newType'],
+                'acctNo' => $validated['newAcctNo'],
+            ]));
+
             return;
         }
 
-        $email = trim($validated['newEmail']) !== '' ? trim($validated['newEmail']) : null;
-
-        \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $email) {
-            if ($email !== null) {
-                // An email may only be linked to one account number at a time.
-                UserProperty::where('acct_email_address', $email)
-                    ->where('acct_no', '!=', $validated['newAcctNo'])
-                    ->update(['acct_email_address' => null]);
-            }
-
-            UserProperty::create([
-                'acct_email_address' => $email,
-                'acct_no' => $validated['newAcctNo'],
-                'name_of_account' => $validated['newNameOfAccount'],
-                'account_code' => $validated['newAccountCode'],
-                'type' => $validated['newType'],
-                'lot_no' => $validated['newLotNo'] !== '' ? $validated['newLotNo'] : null,
-                'brgy_name' => $validated['newBrgyName'],
-                'lgu' => $validated['newLgu'],
-                'date_of_registration' => $validated['newDateOfRegistration'],
-                'status' => $validated['newStatus'],
-            ]);
-
-            if ($email !== null) {
-                $user = \App\Models\User::where('email', $email)->first();
-
-                if ($user) {
-                    // Only one user may be linked to this acct_no.
-                    \App\Models\User::where('acct_no', $validated['newAcctNo'])
-                        ->where('id', '!=', $user->id)
-                        ->update(['acct_no' => null]);
-
-                    $user->update([
-                        'acct_no' => $validated['newAcctNo'],
-                        'name' => $validated['newNameOfAccount'],
-                        'name_of_account' => $validated['newNameOfAccount'],
-                    ]);
-                }
-            }
-        });
+        UserProperty::create([
+            'acct_email_address' => $validated['newAcctEmailAddress'] !== '' ? $validated['newAcctEmailAddress'] : null,
+            'acct_no' => $validated['newAcctNo'],
+            'name_of_account' => $validated['newNameOfAccount'],
+            'account_code' => $validated['newAccountCode'],
+            'type' => $validated['newType'],
+            'lot_no' => $validated['newLotNo'] !== '' ? $validated['newLotNo'] : null,
+            'brgy_name' => $validated['newBrgyName'],
+            'lgu' => $validated['newLgu'],
+            'date_of_registration' => $validated['newDateOfRegistration'],
+            'status' => $validated['newStatus'],
+        ]);
 
         $this->reset([
-            'newAcctNo', 'newNameOfAccount', 'newAccountCode', 'newLotNo',
-            'newBrgyName', 'newLgu', 'newDateOfRegistration', 'newEmail',
+            'newAcctNo', 'newNameOfAccount', 'newAccountCode', 'newType',
+            'newLotNo', 'newBrgyName', 'newLgu', 'newDateOfRegistration',
+            'newStatus', 'newAcctEmailAddress',
         ]);
         $this->newType = 'Land';
         $this->newStatus = 'active';
 
         $this->resetPage();
-        $this->dispatch('$refresh');
         $this->dispatch('property-added');
 
-        session()->flash('status', __('Property added successfully.'));
+        session()->flash('status', __('Property added.'));
     }
 
     #[Computed]

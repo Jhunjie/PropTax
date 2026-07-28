@@ -1,11 +1,7 @@
 <div
-    x-data="{ importOpen: false, addOpen: false, uploadProgress: 0, uploading: false }"
+    x-data="{ importOpen: false, addOpen: false }"
     x-on:property-imported.window="importOpen = false"
     x-on:property-added.window="addOpen = false"
-    x-on:livewire-upload-start="uploading = true; uploadProgress = 0"
-    x-on:livewire-upload-finish="uploading = false; uploadProgress = 100"
-    x-on:livewire-upload-error="uploading = false"
-    x-on:livewire-upload-progress="uploadProgress = $event.detail.progress"
 >
 
     {{-- Page header --}}
@@ -15,11 +11,12 @@
             <p>{{ __('Every property on record, and which ones still need an owner email linked.') }}</p>
         </div>
 
-        <div style="display:flex; gap:10px;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
             <button type="button" class="btn btn-ghost" x-on:click="addOpen = true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
                 {{ __('Add property') }}
             </button>
+
             <button type="button" class="btn btn-dark" x-on:click="importOpen = true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
                 {{ __('Import spreadsheet') }}
@@ -129,6 +126,7 @@
                 @endif
             </div>
         @else
+            <div class="table-scroll">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -205,6 +203,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         @endif
     </div>
 
@@ -226,15 +225,24 @@
                 @enderror
             </div>
 
-            <div x-show="uploading" x-cloak class="progress-bar" role="progressbar" :aria-valuenow="uploadProgress" aria-valuemin="0" aria-valuemax="100">
-                <div class="progress-bar-fill" :style="`width: ${uploadProgress}%`"></div>
+            <div
+                x-data="{ progress: 0, uploading: false }"
+                x-on:livewire-upload-start="uploading = true; progress = 0"
+                x-on:livewire-upload-progress="progress = $event.detail.progress"
+                x-on:livewire-upload-finish="uploading = false; progress = 100"
+                x-on:livewire-upload-error="uploading = false"
+                x-on:livewire-upload-cancel="uploading = false"
+            >
+                <div class="loading-note" x-show="uploading" x-cloak>
+                    <span x-text="`{{ __('Uploading…') }} ${progress}%`"></span>
+                </div>
+                <div class="progress-track" x-show="uploading" x-cloak>
+                    <div class="progress-fill" :style="`width: ${progress}%`"></div>
+                </div>
             </div>
-            <div x-show="uploading" x-cloak class="loading-note" x-text="`{{ __('Uploading…') }} ${uploadProgress}%`"></div>
 
             <div wire:loading wire:target="importUpload" class="loading-note">
-                <div class="progress-bar progress-bar-indeterminate">
-                    <div class="progress-bar-fill"></div>
-                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;"><circle cx="12" cy="12" r="9" stroke-opacity=".25"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>
                 {{ __('Processing spreadsheet…') }}
             </div>
 
@@ -244,7 +252,7 @@
                     type="button"
                     wire:click="importUpload"
                     wire:loading.attr="disabled"
-                    wire:target="importUpload"
+                    wire:target="importUpload,upload"
                     class="btn btn-dark"
                 >
                     <span wire:loading.remove wire:target="importUpload">{{ __('Import') }}</span>
@@ -256,73 +264,71 @@
 
     {{-- Add property modal --}}
     <div class="modal-mask" x-show="addOpen" x-cloak x-on:click.self="addOpen = false" x-transition>
-        <div class="modal-box">
+        <div class="modal-box modal-box-lg">
             <h2 style="font-size:18px; margin-bottom:6px;">{{ __('Add a property') }}</h2>
             <p style="color:var(--ink-soft); font-size:13.5px; line-height:1.55; margin-bottom:18px;">
-                {{ __('Manually register a single property. Linking an owner email here works the same as importing a spreadsheet — each email can only be linked to one account number.') }}
+                {{ __('Manually register a single property, e.g. a late submission or a correction. Use spreadsheet import for bulk records.') }}
             </p>
 
-            <div class="field">
-                <label>{{ __('Account number') }}</label>
-                <input type="text" inputmode="numeric" wire:model="newAcctNo">
-                @error('newAcctNo') <div class="field-error">{{ $message }}</div> @enderror
+            <div class="field-row field-row-2">
+                <div class="field">
+                    <label>{{ __('Account number') }}</label>
+                    <input type="number" wire:model="newAcctNo" min="1">
+                    @error('newAcctNo') <div class="field-error">{{ $message }}</div> @enderror
+                </div>
+                <div class="field">
+                    <label>{{ __('Type') }}</label>
+                    <select wire:model="newType" class="select-field" style="width:100%;">
+                        <option value="Land">{{ __('Land') }}</option>
+                        <option value="Impr/Bldg">{{ __('Impr/Bldg') }}</option>
+                    </select>
+                    @error('newType') <div class="field-error">{{ $message }}</div> @enderror
+                </div>
+            </div>
+
+            <div class="field-row field-row-2">
+                <div class="field">
+                    <label>{{ __('Name on account') }}</label>
+                    <input type="text" wire:model="newNameOfAccount">
+                    @error('newNameOfAccount') <div class="field-error">{{ $message }}</div> @enderror
+                </div>
+                <div class="field">
+                    <label>{{ __('Account code') }}</label>
+                    <input type="text" wire:model="newAccountCode">
+                    @error('newAccountCode') <div class="field-error">{{ $message }}</div> @enderror
+                </div>
+            </div>
+
+            <div class="field-row field-row-2">
+                <div class="field">
+                    <label>{{ __('Lot no.') }} <span style="color:var(--ink-faint);">({{ __('optional') }})</span></label>
+                    <input type="text" wire:model="newLotNo">
+                    @error('newLotNo') <div class="field-error">{{ $message }}</div> @enderror
+                </div>
+                <div class="field">
+                    <label>{{ __('Date of registration') }}</label>
+                    <input type="date" wire:model="newDateOfRegistration">
+                    @error('newDateOfRegistration') <div class="field-error">{{ $message }}</div> @enderror
+                </div>
+            </div>
+
+            <div class="field-row field-row-2">
+                <div class="field">
+                    <label>{{ __('Barangay') }}</label>
+                    <input type="text" wire:model="newBrgyName">
+                    @error('newBrgyName') <div class="field-error">{{ $message }}</div> @enderror
+                </div>
+                <div class="field">
+                    <label>{{ __('LGU') }}</label>
+                    <input type="text" wire:model="newLgu">
+                    @error('newLgu') <div class="field-error">{{ $message }}</div> @enderror
+                </div>
             </div>
 
             <div class="field">
-                <label>{{ __('Name on account') }}</label>
-                <input type="text" wire:model="newNameOfAccount">
-                @error('newNameOfAccount') <div class="field-error">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="field">
-                <label>{{ __('Account code') }}</label>
-                <input type="text" wire:model="newAccountCode">
-                @error('newAccountCode') <div class="field-error">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="field">
-                <label>{{ __('Type') }}</label>
-                <select wire:model="newType">
-                    <option value="Land">{{ __('Land') }}</option>
-                    <option value="Impr/Bldg">{{ __('Impr/Bldg') }}</option>
-                </select>
-                @error('newType') <div class="field-error">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="field">
-                <label>{{ __('Lot no. (optional)') }}</label>
-                <input type="text" wire:model="newLotNo">
-                @error('newLotNo') <div class="field-error">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="field">
-                <label>{{ __('Barangay') }}</label>
-                <input type="text" wire:model="newBrgyName">
-                @error('newBrgyName') <div class="field-error">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="field">
-                <label>{{ __('LGU') }}</label>
-                <input type="text" wire:model="newLgu">
-                @error('newLgu') <div class="field-error">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="field">
-                <label>{{ __('Date of registration') }}</label>
-                <input type="date" wire:model="newDateOfRegistration">
-                @error('newDateOfRegistration') <div class="field-error">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="field">
-                <label>{{ __('Status') }}</label>
-                <input type="text" wire:model="newStatus" placeholder="active">
-                @error('newStatus') <div class="field-error">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="field">
-                <label>{{ __('Owner email (optional)') }}</label>
-                <input type="email" wire:model="newEmail" placeholder="owner@example.com">
-                @error('newEmail') <div class="field-error">{{ $message }}</div> @enderror
+                <label>{{ __('Owner email') }} <span style="color:var(--ink-faint);">({{ __('optional') }})</span></label>
+                <input type="email" wire:model="newAcctEmailAddress" placeholder="{{ __('Leave blank to link later') }}">
+                @error('newAcctEmailAddress') <div class="field-error">{{ $message }}</div> @enderror
             </div>
 
             <div class="modal-actions">
@@ -344,26 +350,12 @@
 
 <style>
 @keyframes spin { to { transform: rotate(360deg); } }
-
-.progress-bar{
-    width:100%; height:8px; border-radius:999px;
-    background:var(--surface-2, #F1F0EA);
-    overflow:hidden; margin:10px 0 6px;
+.progress-track{
+    width:100%; height:6px; border-radius:100px; overflow:hidden;
+    background:var(--surface-2); margin:8px 0 4px;
 }
-.progress-bar-fill{
-    height:100%; border-radius:999px;
-    background:var(--green, #0E6B52);
-    transition:width .2s ease;
-}
-.progress-bar-indeterminate .progress-bar-fill{
-    width:40%;
-    animation:progress-indeterminate 1.2s ease-in-out infinite;
-}
-@keyframes progress-indeterminate{
-    0%{ transform:translateX(-100%); }
-    100%{ transform:translateX(250%); }
-}
-@media (prefers-reduced-motion: reduce){
-    .progress-bar-indeterminate .progress-bar-fill{ animation:none; width:100%; }
+.progress-fill{
+    height:100%; background:var(--green); border-radius:100px;
+    transition:width .15s ease;
 }
 </style>

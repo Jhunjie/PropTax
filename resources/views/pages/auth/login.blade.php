@@ -2,9 +2,6 @@
     <div class="flex flex-col gap-6">
         <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
 
-        <!-- Session Status -->
-        <x-auth-session-status class="text-center" :status="session('status')" />
-
 
         <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-6">
             @csrf
@@ -55,4 +52,26 @@
             <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
         </div>
     </div>
+
+    @if (session('status'))
+        <flux:modal name="session-status" :show="true" class="max-w-md">
+            <div class="space-y-4 text-center">
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40">
+                    <svg class="h-6 w-6 text-green-600 dark:text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.5 12.2l2.3 2.3 4.7-5" />
+                        <circle cx="12" cy="12" r="9" />
+                    </svg>
+                </div>
+
+                <div class="space-y-1">
+                    <flux:heading size="lg">{{ __('Account created') }}</flux:heading>
+                    <flux:subheading>{{ session('status') }}</flux:subheading>
+                </div>
+
+                <flux:modal.close>
+                    <flux:button variant="primary" class="w-full">{{ __('Got it') }}</flux:button>
+                </flux:modal.close>
+            </div>
+        </flux:modal>
+    @endif
 </x-layouts::auth>

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -25,9 +25,9 @@ use Illuminate\Support\Str;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'is_verified', 'status', 'tin', 'role', 'date_created', 'acct_no', 'name_of_account'])]
+#[Fillable(['name', 'email', 'password', 'is_verified', 'status', 'tin', 'role', 'date_created', 'acct_no', 'name_of_account', 'privacy_accepted_at'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
 
     const STATUS_PENDING  = 'pending';
@@ -49,6 +49,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'privacy_accepted_at' => 'datetime',
             'date_created' => 'date',
             'password' => 'hashed',
         ];
@@ -64,6 +65,10 @@ class User extends Authenticatable
      */
     public function initials(): string
     {
+        if (! $this->name) {
+            return '?';
+        }
+
         $initials = Str::initials($this->name, true);
 
         return Str::length($initials) > 1

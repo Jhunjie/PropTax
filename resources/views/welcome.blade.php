@@ -29,57 +29,6 @@
     --shadow: 0 24px 60px -30px rgba(20,23,31,0.28);
   }
 
-.status-banner{
-  background:var(--green-soft); color:var(--green-deep);
-  border-bottom:1px solid var(--green);
-  padding:14px 0;
-}
-.status-banner.is-error{
-  background:#FBEAE5; color:#8A3A24; border-bottom-color:#B3402A;
-}
-.status-banner .wrap{
-  display:flex; align-items:center; justify-content:space-between; gap:16px;
-}
-.status-banner p{
-  margin:0; font-size:14px; font-weight:500; line-height:1.5;
-}
-.status-banner .dismiss{
-  background:none; border:none; cursor:pointer; color:inherit; opacity:0.6;
-  font-size:15px; line-height:1; padding:4px; flex-shrink:0;
-  transition:opacity .15s ease;
-}
-.status-banner .dismiss:hover{ opacity:1; }
-
-/* ---------- TOAST NOTIFICATIONS ---------- */
-.toast-stack{
-  position:fixed; top:20px; right:20px; z-index:1000;
-  display:flex; flex-direction:column; gap:10px;
-  max-width:380px; width:calc(100% - 40px);
-}
-.toast{
-  display:flex; align-items:flex-start; gap:10px;
-  background:var(--surface); color:var(--ink);
-  border:1px solid var(--line-strong); border-left:4px solid var(--green);
-  border-radius:10px; padding:14px 14px;
-  box-shadow:var(--shadow);
-  font-size:13.5px; line-height:1.5;
-  transform:translateX(24px); opacity:0;
-  transition:transform .25s ease, opacity .25s ease;
-}
-.toast.is-visible{ transform:translateX(0); opacity:1; }
-.toast.toast-error{ border-left-color:#B3402A; }
-.toast.toast-success{ border-left-color:var(--green); }
-.toast-icon{ flex-shrink:0; width:18px; height:18px; margin-top:1px; }
-.toast-error .toast-icon{ color:#B3402A; }
-.toast-success .toast-icon{ color:var(--green); }
-.toast-body{ flex:1; min-width:0; }
-.toast-close{
-  background:none; border:none; cursor:pointer; color:var(--ink-faint);
-  opacity:0.7; font-size:14px; line-height:1; padding:2px; flex-shrink:0;
-}
-.toast-close:hover{ opacity:1; }
-@media (prefers-reduced-motion: reduce){ .toast{ transition:none; } }
-
   *{ box-sizing:border-box; }
   html{ scroll-behavior:smooth; }
   body{
@@ -112,11 +61,19 @@
 
   /* ---------- LOGO MARK ---------- */
   .mark{ width:26px; height:26px; flex-shrink:0; }
+  .brand-mark{ display:flex; align-items:center; gap:10px; }
+  .brand-mark-logo{ height:38px; width:auto; flex-shrink:0; object-fit:contain; }
+  .brand-mark-text{ display:flex; flex-direction:column; line-height:1.2; }
+  .brand-mark-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; letter-spacing:.01em; }
+  .brand-mark-sub{ font-size:10.5px; color:var(--ink-faint); font-weight:500; }
+  .brand-mark-sm .brand-mark-logo{ height:30px; }
+  .brand-mark-sm .brand-mark-title{ font-size:11.5px; }
+  .brand-mark-sm .brand-mark-sub{ font-size:9.5px; }
 
   /* ---------- NAV ---------- */
   .nav{
     position:sticky; top:0; z-index:50;
-    background:rgba(250,250,247,0.86);
+    background:rgba(250, 250, 247, 0.89);
     backdrop-filter:blur(10px);
     border-bottom:1px solid var(--line);
   }
@@ -133,8 +90,44 @@
     font-size:14px; font-weight:500; text-decoration:none; border:1px solid var(--ink);
     transition:background .15s ease, transform .15s ease;
   }
+
+
+
   .nav-cta:hover{ background:var(--green-deep); border-color:var(--green-deep); transform:translateY(-1px); }
-  @media (max-width:820px){ .nav-links{ display:none; } .nav-login{ display:none; } }
+  .nav-burger{
+    display:none; width:38px; height:38px; align-items:center; justify-content:center;
+    border-radius:10px; border:1px solid var(--line-strong); background:none; color:var(--ink);
+    cursor:pointer; flex-shrink:0;
+  }
+  .nav-burger svg{ width:18px; height:18px; }
+  .nav-mobile-panel{
+    display:none; flex-direction:column; gap:2px;
+    max-height:0; overflow:hidden;
+    border-top:1px solid transparent;
+    transition:max-height .25s ease, border-color .25s ease;
+    background:var(--bg);
+  }
+  .nav-mobile-panel a, .nav-mobile-panel .nav-mobile-login{
+    padding:14px 32px; font-size:15px; font-weight:500; color:var(--ink); text-decoration:none;
+    border-top:1px solid var(--line); background:none; border-left:none; border-right:none; border-bottom:none;
+    text-align:left; font-family:inherit; cursor:pointer; width:100%;
+  }
+  .nav-mobile-register{
+    padding:14px 32px; font-size:15px; font-weight:500; color:white; text-decoration:none; background:var(--green); 
+    border-top:1px solid var(--line); border-left:none; border-right:none; border-bottom:none;
+    text-align:left; font-family:inherit; cursor:pointer; width:100%;
+  }
+  .nav.is-open .nav-mobile-panel{ max-height:320px; border-top-color:var(--line); }
+  @media (max-width:820px){
+    .nav-links{ display:none; }
+    .nav-login{ display:none; }
+    .nav-burger{ display:flex; }
+    .nav-mobile-panel{ display:flex; }
+  }
+  @media (max-width:500px){
+    .nav-cta{ display:none; }
+    #features, #fees{ padding: 0 1rem 0 1rem;}
+  }
 
   /* ---------- AUTH MODALS ---------- */
   .modal-overlay{
@@ -152,6 +145,8 @@
   }
   .modal-dialog{
     width:100%; max-width:400px;
+    max-height:calc(100dvh - 40px);
+    overflow-y:auto;
     background:var(--surface);
     border:1px solid var(--line);
     border-radius:20px;
@@ -174,7 +169,7 @@
     font-size:16px; line-height:1; transition:background .15s ease, color .15s ease;
   }
   .modal-close:hover{ background:var(--line); color:var(--ink); }
-  .modal-mark{ display:flex; align-items:center; gap:9px; font-family:'Space Grotesk'; font-weight:600; font-size:17px; margin-bottom:22px; }
+  .modal-mark{ margin-bottom:22px; }
   .modal-dialog h2{ font-size:23px; margin-bottom:6px; }
   .modal-sub{ font-size:14px; color:var(--ink-soft); margin:0 0 24px; line-height:1.5; }
   .field-group{ margin-bottom:16px; }
@@ -208,9 +203,29 @@
 
   /* ---------- HERO ---------- */
   .hero{ padding:44px 0 72px; overflow:hidden; position:relative; }
+  .hero-bg-photo{
+    position:absolute; inset:0; z-index:0;
+    width:100%; height:100%; object-fit:cover; object-position:center;
+    pointer-events:none;
+    mask-image:linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0) 100%);
+    -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0) 100%);
+    opacity:0; transform:scale(1.08);
+    animation: hero-bg-in 1.6s cubic-bezier(.2,.8,.3,1) forwards;
+  }
+  @keyframes hero-bg-in{
+    from{ opacity:0; transform:scale(1.08); }
+    to{ opacity:0.8; transform:scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hero-bg-photo{ animation:none; opacity:0.8; transform:none; }
+  }
+  .hero-bg-overlay{
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:linear-gradient(180deg, rgba(250,250,247,0.25) 0%, var(--bg) 96%);
+  }
   .hero-grid-bg{
     position:absolute; inset:-30px -8% auto auto; width:460px; height:460px;
-    pointer-events:none;
+    pointer-events:none; z-index:1;
   }
   .hero-grid-bg rect.cell{
     opacity:0; transform-origin:center; transform-box:fill-box;
@@ -230,7 +245,7 @@
   @media (prefers-reduced-motion: reduce){
     .hero-grid-bg rect.cell{ animation:none; opacity:1; }
   }
-  .hero .wrap{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:60px; align-items:center; position:relative; }
+  .hero .wrap{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:60px; align-items:center; position:relative; z-index:2; }
   .eyebrow{
     display:inline-flex; align-items:center; gap:8px;
     font-family:'IBM Plex Mono'; font-size:12px; letter-spacing:.06em; text-transform:uppercase;
@@ -262,7 +277,7 @@
   /* Signature element: bill lookup card */
   .card-stage{ display:flex; justify-content:center; position:relative; }
   .bill-card{
-    width:360px; background:var(--surface);
+    width:100%; max-width:360px; background:var(--surface);
     border:1px solid var(--line);
     box-shadow:var(--shadow);
     border-radius:20px;
@@ -313,6 +328,15 @@
     .card-stage{ margin-top:12px; }
     .hero-grid-bg{ display:none; }
   }
+  @media (max-width:560px){
+    .wrap{ padding:0 20px; }
+    .hero{ padding:32px 0 56px; }
+    .hero h1{ font-size:30px; }
+    .hero p.lede{ font-size:12px; margin:16px 0 28px; }
+    .hero-stats{ gap:22px; flex-wrap:wrap; margin-top:36px; }
+    .btn-row{ gap:16px; }
+    .bill-card{ padding:22px 20px 20px; }
+  }
 
   /* ---------- TRUST BAR ---------- */
   .trust{ background:var(--bg); border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:30px 0; }
@@ -327,6 +351,11 @@
   .sec-eyebrow{ font-family:'IBM Plex Mono'; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--green); margin-bottom:14px; display:block; }
   .sec-head h2{ font-size:32px; line-height:1.18; }
   .sec-head p{ color:var(--ink-soft); font-size:15.5px; margin-top:14px; line-height:1.6; }
+  @media (max-width:560px){
+    .sec{ padding:52px 0; }
+    .sec-head{ margin-bottom:36px; }
+    .sec-head h2{ font-size:25px; }
+  }
 
   /* ---------- HOW IT WORKS ---------- */
   .steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:36px; }
@@ -340,7 +369,20 @@
   @media (max-width:900px){ .steps{ grid-template-columns:1fr 1fr; row-gap:40px; } }
 
   /* ---------- FEATURES ---------- */
-  .features{ background:var(--surface-2); }
+  .features{ background:var(--surface-2); position:relative; overflow:hidden; }
+  .features-bg-photo{
+    position:absolute; inset:0; z-index:0;
+    width:100%; height:100%; object-fit:cover; object-position:center;
+    opacity:0.3; pointer-events:none;
+    mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.9) 35%, rgba(0,0,0,0.9) 65%, rgba(0,0,0,0) 100%);
+    -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.9) 35%, rgba(0,0,0,0.9) 65%, rgba(0,0,0,0) 100%);
+  }
+  .features-bg-overlay{
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:var(--surface-2);
+    opacity:0.55;
+  }
+  .features .wrap{ position:relative; z-index:2; }
   .feat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
   .feat-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:28px 26px; transition:transform .18s ease, box-shadow .18s ease; }
   .feat-card:hover{ transform:translateY(-3px); box-shadow:0 16px 34px -22px rgba(20,23,31,0.35); }
@@ -349,14 +391,6 @@
   .feat-card p{ font-size:13.5px; color:var(--ink-soft); line-height:1.55; margin:0; }
   @media (max-width:900px){ .feat-grid{ grid-template-columns:1fr 1fr; } }
   @media (max-width:600px){ .feat-grid{ grid-template-columns:1fr; } }
-
-  /* ---------- TESTIMONIALS ---------- */
-  .testi-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
-  .testi{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:26px; }
-  .testi .mark-quote{ font-family:'Space Grotesk'; font-size:13px; color:var(--ink-faint); letter-spacing:.05em; margin-bottom:14px; }
-  .testi p.quote{ font-size:14.5px; line-height:1.65; color:var(--ink); margin:0 0 20px; }
-  .testi .who{ font-size:12px; color:var(--ink-faint); font-family:'IBM Plex Mono'; letter-spacing:.02em; }
-  @media (max-width:900px){ .testi-grid{ grid-template-columns:1fr; } }
 
   /* ---------- FEES ---------- */
   .fees{ background:var(--dark); color:#fff; }
@@ -375,7 +409,7 @@
   .faq-q{
     display:flex; justify-content:space-between; align-items:center; gap:20px;
     padding:22px 2px; cursor:pointer; font-size:15.5px; font-weight:500; background:none; border:none;
-    width:100%; text-align:left; color:var(--ink); font-family:'IBM Plex Sans';
+    width:100%; text-align:left; color:white; font-family:'IBM Plex Sans';
   }
   .faq-q .plus{ font-family:'IBM Plex Mono'; color:var(--green); font-size:19px; transition:transform .2s ease; flex-shrink:0; }
   .faq-item.open .plus{ transform:rotate(45deg); }
@@ -386,35 +420,42 @@
   .final-cta{ text-align:center; padding:100px 0; background:var(--surface-2); }
   .final-cta h2{ font-size:34px; max-width:580px; margin:0 auto 16px; line-height:1.2; }
   .final-cta p{ color:var(--ink-soft); font-size:15.5px; margin-bottom:30px; }
+  @media (max-width:560px){
+    .final-cta{ padding:64px 0; }
+    .final-cta h2{ font-size:26px; }
+  }
 
   /* ---------- FOOTER ---------- */
-  footer{ padding:44px 0; }
+  footer{ padding:36px 0 44px; }
   footer .wrap{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; }
   .foot-links{ display:flex; gap:24px; font-size:13.5px; color:var(--ink-soft); }
   .foot-links a{ text-decoration:none; }
   .foot-links a:hover{ color:var(--ink); }
   .foot-badges{ display:flex; gap:12px; font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--ink-faint); }
   .foot-badges span{ border:1px solid var(--line); padding:5px 10px; border-radius:100px; }
+  .foot-partners{
+    display:flex; align-items:center; gap:22px; flex-wrap:wrap; padding-bottom:28px; margin-bottom:28px;
+    border-bottom:1px solid var(--line);
+  }
+  .foot-partners img{ height:42px; width:auto; object-fit:contain; flex-shrink:0; }
+  .foot-partners .divider{ width:1px; height:34px; background:var(--line-strong); }
+  .foot-partners .cap{ font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); }
+  @media (max-width:560px){
+    .foot-partners{ gap:14px; }
+    .foot-partners img{ height:32px; }
+    .foot-partners .divider{ display:none; }
+    .foot-partners .cap{ flex-basis:100%; }
+  }
 </style>
 </head>
 <body>
 
 <nav class="nav">
   <div class="wrap">
-    <div class="brand">
-      <svg class="mark" viewBox="0 0 26 26" fill="none">
-        <rect x="1" y="1" width="24" height="24" rx="6" fill="#0E6B52"/>
-        <rect x="4.5" y="4.5" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.9"/>
-        <rect x="14" y="4.5" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
-        <rect x="4.5" y="14" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
-        <rect x="14" y="14" width="7.5" height="7.5" rx="1.5" fill="#C99A2E"/>
-      </svg>
-      {{ config('app.name') }}
-    </div>
+    <x-brand-mark />
     <div class="nav-links">
       <a href="#how">How it works</a>
       <a href="#features">Features</a>
-      <a href="#fees">Fees</a>
       <a href="#faq">FAQ</a>
     </div>
     <div class="nav-right">
@@ -424,19 +465,38 @@
         <button type="button" class="nav-login" data-open-modal="login">Log in</button>
         <button type="button" class="nav-cta" data-open-modal="register">Get started</button>
       @endauth
+      <button type="button" class="nav-burger" id="navBurger" aria-label="Open menu" aria-expanded="false" aria-controls="navMobilePanel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
     </div>
+  </div>
+
+  <div class="nav-mobile-panel" id="navMobilePanel">
+    @guest
+      <button type="button" class="nav-mobile-register" data-open-modal="register">Register</button>
+    @endguest
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#faq">FAQ</a>
+    @guest
+      <button type="button" class="nav-mobile-login" data-open-modal="login">Log in</button>
+    @endguest
   </div>
 </nav>
 
 <section class="hero">
+  <img src="{{ asset('images/hero-bg.jpg') }}" alt="" class="hero-bg-photo" aria-hidden="true">
+  <div class="hero-bg-overlay" aria-hidden="true"></div>
   <svg class="hero-grid-bg" id="parcelSvg" viewBox="0 0 460 460" fill="none" aria-hidden="true"></svg>
   <div class="wrap">
     <div>
       <span class="eyebrow"><span class="dot"></span>Now live in 48 municipalities</span>
-      <h1>Real property tax,<br>paid before it becomes <em>a problem.</em></h1>
-      <p class="lede">Look up your land or building account by RPT number, lot, or barangay — see exactly what's owed, and pay in under two minutes. No line at the treasurer's office.</p>
+      <h1>Real property tax,<br>made <em>easy to pay.</em></h1>
+      <p class="lede">Manage your real property tax online. View your tax balance, verify your property details, and pay securely—all in one place.</p>
       <div class="btn-row">
-        <a href="#" class="btn-primary">Look up my property →</a>
+        @guest
+          <a data-open-modal="register" class="btn-primary">Look up my property →</a>
+        @endguest
         <a href="#how" class="btn-ghost">See how it works</a>
       </div>
       <div class="hero-stats">
@@ -508,6 +568,8 @@
 </section>
 
 <section class="features" id="features">
+  <img src="{{ asset('images/features-bg.jpg') }}" alt="" class="features-bg-photo" aria-hidden="true">
+  <div class="features-bg-overlay" aria-hidden="true"></div>
   <div class="wrap sec">
     <div class="sec-head reveal">
       <span class="sec-eyebrow">Built for the way people actually pay</span>
@@ -549,64 +611,9 @@
   </div>
 </section>
 
-<section class="sec">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="sec-eyebrow">What residents say</span>
-      <h2>Fewer trips to the county office.</h2>
-    </div>
-    <div class="testi-grid reveal">
-      <div class="testi">
-        <div class="mark-quote">“</div>
-        <p class="quote">I paid three lots for my mother's estate in one sitting instead of three separate trips to the treasurer's office.</p>
-        <div class="who">R. DELA CRUZ — BRGY. ROBLES, LA CASTELLANA</div>
-      </div>
-      <div class="testi">
-        <div class="mark-quote">“</div>
-        <p class="quote">The reminder text saved me a penalty. Honestly, I'd have forgotten the due date otherwise.</p>
-        <div class="who">M. SANTOS — BRGY. 1, LA CASTELLANA</div>
-      </div>
-      <div class="testi">
-        <div class="mark-quote">“</div>
-        <p class="quote">Paying through GCash instead of queuing at the counter gave me back an entire morning.</p>
-        <div class="who">G. ABELLA — POBLACION, LA CASTELLANA</div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section class="fees" id="fees">
   <div class="wrap sec">
-    <div class="sec-head reveal">
-      <span class="sec-eyebrow">Fees, in plain terms</span>
-      <h2>No subscription. No tiers. Just processing fees.</h2>
-      <p>Your LGU receives 100% of the tax amount. Fees below cover payment processing only.</p>
-    </div>
-    <div class="fee-table reveal">
-      <div class="fee-row">
-        <div><div class="name">Bank transfer</div><div class="desc">Funds pulled directly from checking or savings</div></div>
-        <div class="amt">Free</div>
-      </div>
-      <div class="fee-row">
-        <div><div class="name">GCash / Maya</div><div class="desc">Small flat fee regardless of bill size</div></div>
-        <div class="amt">₱15.00</div>
-      </div>
-      <div class="fee-row">
-        <div><div class="name">Debit card</div><div class="desc">Flat fee regardless of bill size</div></div>
-        <div class="amt">₱25.00</div>
-      </div>
-      <div class="fee-row">
-        <div><div class="name">Credit card</div><div class="desc">Set by the card networks, not the LGU</div></div>
-        <div class="amt">2.35%</div>
-      </div>
-    </div>
-    <div class="fee-note"><span class="flag">⚑</span>Linking additional properties, or enabling reminders, never carries an extra platform fee — only the payment method you choose does.</div>
-  </div>
-</section>
-
-<section class="sec" id="faq">
-  <div class="wrap">
-    <div class="sec-head reveal">
+    <div class="sec-head reveal" id="faq" style="margin-top:64px;">
       <span class="sec-eyebrow">Questions</span>
       <h2>Common questions from residents.</h2>
     </div>
@@ -648,46 +655,34 @@
 </section>
 
 <footer>
-  <div class="wrap">
-    <div class="brand" style="font-size:15.5px;">
-      <svg class="mark" viewBox="0 0 26 26" fill="none" style="width:22px;height:22px;">
-        <rect x="1" y="1" width="24" height="24" rx="6" fill="#0E6B52"/>
-        <rect x="4.5" y="4.5" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.9"/>
-        <rect x="14" y="4.5" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
-        <rect x="4.5" y="14" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
-        <rect x="14" y="14" width="7.5" height="7.5" rx="1.5" fill="#C99A2E"/>
-      </svg>
-      {{ config('app.name') }}
+  <div class="wrap" style="display:block;">
+    <div class="foot-partners">
+      <a href="https://www.negros-occ.gov.ph/assets/RegistrationCert.pdf"><img src="{{ asset('images/footer-logo-1.png') }}" alt="{{ __('National Privacy Commission seal') }}"></a>
+      <div class="divider"></div>
+      <a href="https://www.negros-occ.gov.ph/" target="_blank" rel="noopener noreferrer"><img src="{{ asset('images/footer-logo-2.png') }}" alt="{{ __('Partner agency logo') }}"></a>
+      <span class="cap">{{ __('A joint initiative with the provincial treasurer\'s office') }}</span>
     </div>
-    <div class="foot-links">
-      <a href="#">Privacy</a>
-      <a href="#">Terms</a>
-      <a href="#">Accessibility</a>
-      <a href="#">Contact</a>
-    </div>
-    <div class="foot-badges">
-      <span>SSL SECURED</span>
-      <span>PCI DSS COMPLIANT</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+      <x-brand-mark size="sm" />
+      <div class="foot-links">
+        <a href="{{ route('privacy-policy') }}">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Accessibility</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="foot-badges">
+        <span>SSL SECURED</span>
+        <span>PCI DSS COMPLIANT</span>
+      </div>
     </div>
   </div>
 </footer>
-
-<div class="toast-stack" id="toastStack" aria-live="polite"></div>
 
 @guest
 <div class="modal-overlay" id="loginModal" aria-hidden="true">
   <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
     <button type="button" class="modal-close" data-close-modal aria-label="Close">✕</button>
-    <div class="modal-mark">
-      <svg class="mark" viewBox="0 0 26 26" fill="none" style="width:22px;height:22px;">
-        <rect x="1" y="1" width="24" height="24" rx="6" fill="#0E6B52"/>
-        <rect x="4.5" y="4.5" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.9"/>
-        <rect x="14" y="4.5" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
-        <rect x="4.5" y="14" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
-        <rect x="14" y="14" width="7.5" height="7.5" rx="1.5" fill="#C99A2E"/>
-      </svg>
-      {{ config('app.name') }}
-    </div>
+    <x-brand-mark size="sm" class="modal-mark" />
     <h2 id="loginModalTitle">Welcome back</h2>
     <p class="modal-sub">Log in to view your properties and pay your bill.</p>
     <form method="POST" action="{{ route('login') }}">
@@ -724,18 +719,9 @@
 <div class="modal-overlay" id="registerModal" aria-hidden="true">
   <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="registerModalTitle">
     <button type="button" class="modal-close" data-close-modal aria-label="Close">✕</button>
-    <div class="modal-mark">
-      <svg class="mark" viewBox="0 0 26 26" fill="none" style="width:22px;height:22px;">
-        <rect x="1" y="1" width="24" height="24" rx="6" fill="#0E6B52"/>
-        <rect x="4.5" y="4.5" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.9"/>
-        <rect x="14" y="4.5" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
-        <rect x="4.5" y="14" width="7.5" height="7.5" rx="1.5" fill="#FAFAF7" opacity="0.55"/>
-        <rect x="14" y="14" width="7.5" height="7.5" rx="1.5" fill="#C99A2E"/>
-      </svg>
-      {{ config('app.name') }}
-    </div>
+    <x-brand-mark size="sm" class="modal-mark" />
     <h2 id="registerModalTitle">Create your account</h2>
-    <p class="modal-sub">One account holds every property you own.</p>
+    <p class="modal-sub">One account holds every property you own. Your name is filled in automatically once the admin office links your account.</p>
     <form method="POST" action="{{ route('register') }}">
       @csrf
       <div class="field-group">
@@ -754,6 +740,7 @@
     inputmode="numeric"
     pattern="\d{3}-\d{3}-\d{3}(-\d{3,5})?"
     placeholder="123-456-789-000"
+    maxlength="20"
     value="{{ old('tin') }}"
     required
   >
@@ -772,6 +759,15 @@
         <label for="register-password-confirm">Confirm password</label>
         <input id="register-password-confirm" type="password" name="password_confirmation" required>
       </div>
+      <div class="field-row-between" style="justify-content:flex-start;">
+        <label class="remember-me" style="align-items:flex-start;">
+          <input type="checkbox" name="privacy_policy" value="1" required style="margin-top:2px;">
+          <span>I have read and agree to the <a href="{{ route('privacy-policy') }}" target="_blank" rel="noopener" style="color:var(--green); font-weight:500;">Privacy Policy</a>.</span>
+        </label>
+      </div>
+      @error('privacy_policy', 'register')
+        <div class="field-error" style="margin:-10px 0 14px;">{{ $message }}</div>
+      @enderror
       <button type="submit" class="modal-submit">Create account</button>
     </form>
     <div class="modal-switch">Already have an account? <button type="button" data-switch-to="login">Log in</button></div>
@@ -779,36 +775,81 @@
 </div>
 @endguest
 
-<script>
-  // toast notifications
-  function showToast(message, type){
-    const stack = document.getElementById('toastStack');
-    if(!stack || !message) return;
-
-    const toast = document.createElement('div');
-    toast.className = 'toast toast-' + (type === 'error' ? 'error' : 'success');
-    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
-
-    const icon = type === 'error'
-      ? '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>'
-      : '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.2l2.3 2.3 4.7-5"/></svg>';
-
-    toast.innerHTML = icon
-      + '<div class="toast-body"></div>'
-      + '<button type="button" class="toast-close" aria-label="Dismiss">&times;</button>';
-    toast.querySelector('.toast-body').textContent = message;
-
-    const remove = () => {
-      toast.classList.remove('is-visible');
-      setTimeout(()=> toast.remove(), 250);
-    };
-    toast.querySelector('.toast-close').addEventListener('click', remove);
-
-    stack.appendChild(toast);
-    requestAnimationFrame(()=> toast.classList.add('is-visible'));
-    setTimeout(remove, 7000);
+<!-- toast notifications -->
+<div id="toastStack" aria-live="polite" aria-atomic="true"></div>
+<style>
+  #toastStack{
+    position:fixed; top:20px; right:20px; z-index:200;
+    display:flex; flex-direction:column; gap:10px; max-width:360px;
+    width:calc(100% - 40px);
   }
+  @media (max-width:520px){ #toastStack{ left:20px; right:20px; max-width:none; } }
+  .toast{
+    display:flex; align-items:flex-start; gap:10px;
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    box-shadow:var(--shadow); padding:14px 14px 14px 16px; font-size:13.5px; line-height:1.5;
+    border-left:4px solid var(--green);
+    opacity:0; transform:translateY(-8px) scale(.98);
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .toast.is-visible{ opacity:1; transform:translateY(0) scale(1); }
+  .toast.toast-error{ border-left-color:#B3402A; }
+  .toast.toast-success{ border-left-color:var(--green); }
+  .toast-msg{ flex:1; color:var(--ink); }
+  .toast-close{
+    background:none; border:none; cursor:pointer; color:var(--ink-faint); opacity:.7;
+    padding:2px; line-height:1; flex-shrink:0; font-size:14px;
+  }
+  .toast-close:hover{ opacity:1; }
+</style>
+<script>
+  function showToast(message, type){
+    if(!message) return;
+    const stack = document.getElementById('toastStack');
+    if(!stack) return;
+    const el = document.createElement('div');
+    el.className = 'toast' + (type === 'error' ? ' toast-error' : ' toast-success');
+    el.innerHTML = '<span class="toast-msg"></span><button type="button" class="toast-close" aria-label="Dismiss">✕</button>';
+    el.querySelector('.toast-msg').textContent = message;
+    stack.appendChild(el);
+    requestAnimationFrame(()=> el.classList.add('is-visible'));
 
+    function dismiss(){
+      el.classList.remove('is-visible');
+      setTimeout(()=> el.remove(), 200);
+    }
+    el.querySelector('.toast-close').addEventListener('click', dismiss);
+    setTimeout(dismiss, 6000);
+  }
+</script>
+
+<script>
+  // mobile nav
+  (function(){
+    const nav = document.querySelector('.nav');
+    const burger = document.getElementById('navBurger');
+    const panel = document.getElementById('navMobilePanel');
+    if(!nav || !burger || !panel) return;
+
+    function closeNav(){
+      nav.classList.remove('is-open');
+      burger.setAttribute('aria-expanded', 'false');
+    }
+    function toggleNav(){
+      const open = nav.classList.toggle('is-open');
+      burger.setAttribute('aria-expanded', String(open));
+    }
+
+    burger.addEventListener('click', toggleNav);
+    panel.querySelectorAll('a, button').forEach(el=> el.addEventListener('click', closeNav));
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeNav(); });
+    document.addEventListener('click', (e)=>{
+      if(nav.classList.contains('is-open') && !nav.contains(e.target)) closeNav();
+    });
+  })();
+</script>
+
+<script>
   // auth modals
   (function(){
     const modals = { login: document.getElementById('loginModal'), register: document.getElementById('registerModal') };
@@ -836,13 +877,10 @@
       Object.values(modals).forEach(m=> m && closeModal(m));
     }
 
-    // Expose these so the server-driven "reopen this modal" snippet below
-    // (and anything else on the page) can call them; without this they were
-    // trapped inside this closure and silently failed to run, which is why
-    // the modal appeared to just close/exit instead of reopening with the
-    // validation error still showing.
-    window.openModal = openModal;
-    window.closeModal = closeModal;
+    // expose globally so the server-driven "reopen on error" script below,
+    // and any future inline script, can call these reliably
+    window.openAuthModal = openModal;
+    window.closeAuthModal = closeModal;
     window.closeAllAuthModals = closeAll;
 
     document.querySelectorAll('[data-open-modal]').forEach(btn=>{
@@ -864,49 +902,40 @@
     document.addEventListener('keydown', (e)=>{
       if(e.key === 'Escape') closeAll();
     });
-  })();
 
-  // auto-dash the TIN field as the user types: 000-000-000-00000
-  (function(){
-    const tin = document.getElementById('register-tin');
-    if(!tin) return;
-    tin.addEventListener('input', ()=>{
-      const digits = tin.value.replace(/\D/g, '').slice(0, 14);
-      const groups = [digits.slice(0,3), digits.slice(3,6), digits.slice(6,9), digits.slice(9,14)]
-        .filter(g => g.length > 0);
-      tin.value = groups.join('-');
-    });
+    // Auto-dash the TIN field as the resident types (###-###-###-#####)
+    const tinField = document.getElementById('register-tin');
+    if(tinField){
+      tinField.addEventListener('input', ()=>{
+        const digits = tinField.value.replace(/\D/g, '').slice(0, 15);
+        const parts = [digits.slice(0, 3), digits.slice(3, 6), digits.slice(6, 9), digits.slice(9, 15)]
+          .filter(p => p.length > 0);
+        tinField.value = parts.join('-');
+      });
+    }
   })();
 </script>
 
-<!-- reopen the relevant modal automatically if the server redirected back with validation errors,
-     and surface a toast for anything the person needs to notice right away -->
+<!-- reopen the relevant modal and show a toast if the server redirected back with an error or status -->
 @php
   $loginHasErrors = isset($errors) && $errors->hasBag('login') && $errors->login->any();
   $registerHasErrors = isset($errors) && $errors->hasBag('register') && $errors->register->any();
 @endphp
-@if ($loginHasErrors)
-  <script>
-    document.addEventListener('DOMContentLoaded', function(){
-      openModal('login');
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    @if ($loginHasErrors)
+      if (window.openAuthModal) window.openAuthModal('login');
       showToast(@json($errors->login->first()), 'error');
-    });
-  </script>
-@elseif ($registerHasErrors)
-  <script>
-    document.addEventListener('DOMContentLoaded', function(){
-      openModal('register');
-    });
-  </script>
-@endif
+    @elseif ($registerHasErrors)
+      if (window.openAuthModal) window.openAuthModal('register');
+      showToast(@json($errors->register->first()), 'error');
+    @endif
 
-@if (session('status'))
-  <script>
-    document.addEventListener('DOMContentLoaded', function(){
+    @if (session('status'))
       showToast(@json(session('status')), 'success');
-    });
-  </script>
-@endif
+    @endif
+  });
+</script>
 
 <script>
   // signature visual: self-drawing cadastral parcel grid

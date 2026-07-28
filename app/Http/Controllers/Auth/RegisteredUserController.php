@@ -9,7 +9,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
@@ -25,6 +24,9 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'tin' => ['required', 'string', 'max:255'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'privacy_policy' => ['accepted'],
+        ], [
+            'privacy_policy.accepted' => 'You must agree to the Privacy Policy to create an account.',
         ]);
 
         if ($validator->fails()) {
@@ -35,20 +37,20 @@ class RegisteredUserController extends Controller
 
         $validated = $validator->validated();
 
+        // Name is intentionally left blank here. It gets filled in from the
+        // matching property record's "name of account" once an admin links
+        // this email to a property (see UserEmailUpdate), so we don't rely
+        // on the resident to type it correctly at signup.
         $user = User::create([
-            // No name is collected at registration. This is a placeholder
-            // only; the real name is populated automatically from the
-            // imported property spreadsheet once an admin links this email
-            // to an account (see UserEmailUpdate::update()).
-            'name' => (string) Str::of($validated['email'])->before('@')->replace(['.', '_', '-'], ' ')->headline(),
             'email' => $validated['email'],
             'tin' => $validated['tin'],
             'password' => Hash::make($validated['password']),
             'status' => User::STATUS_PENDING,
+            'privacy_accepted_at' => now(),
         ]);
 
         event(new Registered($user));
 
-        return redirect()->route('login')->with('status', __('Your account has been created and is pending approval. You will be notified once it is reviewed.'));
+        return redirect()->route('login')->with('status', __("We've sent a verification link to your email. Verify it, then log in — your account will also need admin approval before you can view your properties."));
     }
 }

@@ -93,13 +93,18 @@ class PropertyRegistrationSheetImport
             return;
         }
 
-        $exists = UserProperty::where('account_code', $row['account_code'])
+        // acct_no is the reliable identifier (cast to integer). account_code
+        // is free text and can format inconsistently between spreadsheet
+        // variants (leading zeros, stray whitespace, etc.), so it isn't
+        // dependable enough on its own to catch every duplicate.
+        $exists = UserProperty::where('acct_no', $row['acct_no'])
             ->where('type', $row['type'])
             ->exists();
 
         if ($exists) {
             $this->duplicates[] = [
                 'account_code' => $row['account_code'],
+                'acct_no' => $row['acct_no'],
                 'type' => $row['type'],
             ];
 
@@ -178,13 +183,7 @@ class PropertyRegistrationSheetImport
                 continue;
             }
 
-            $value = $rawRow[$column] ?? null;
-
-            // Trim stray whitespace from spreadsheet cells so that, e.g.,
-            // "ABC-001 " and "ABC-001" are recognized as the same account
-            // when checking for duplicates instead of being treated as two
-            // different rows.
-            $row[$key] = is_string($value) ? trim($value) : $value;
+            $row[$key] = $rawRow[$column] ?? null;
         }
 
         return $row;
